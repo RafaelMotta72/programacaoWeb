@@ -1,52 +1,71 @@
-// Carrega framework express
 const express = require('express');
-
-// Cria um app usando a função express
 const app = express();
-
-// Define porta da aplicação
 const PORT = 8080;
 
-// Cria um array vazio para armazenar respostas do usuário
-const LOG = []
 
-// Define o que será respondido caso o usuário faça uma requisição ao endereço / (raíz).
-app.get('/', function (req, res){
-    res.send('<h1>Oi Tio!</h1><p> Bons equipamentos \n Você sabe o caminho pra amadora?</p>')
+let estoque = [];
+
+app.get('/adicionar/:id/:nome/:qtd', (req, res) => {
+    const { id, nome, qtd } = req.params;
+    const novoProduto = { 
+        id: id, 
+        nome: nome, 
+        qtd: Number(qtd) 
+    };
+    
+    estoque.push(novoProduto);
+    res.send(`<h1>Produto ${nome} adicionado.</h1>`);
 });
 
-//URL fixa
-app.get('/ola/joao', function (req, res){
-    res.send('olá, João!')
+
+app.get('/listar', (req, res) => {
+    if (estoque.length === 0) {
+        return res.send('<h1>Estoque vazio.</h1>');
+    }
+
+    let listagem = '<h1>Produtos no Estoque:</h1><ul>';
+    estoque.forEach(p => {
+        listagem += `<li>ID: ${p.id} | Nome: ${p.nome} | Qtd: ${p.qtd}</li>`;
+    });
+    listagem += '</ul>';
+    
+    res.send(listagem);
 });
 
-//URL com parâmetro
-app.get('/ola/:nome', function (req, res){
-    res.send(`Olá, ${req.params.nome}!`);
+
+app.get('/remover/:id', (req, res) => {
+    const { id } = req.params;
+    const tamanhoAntes = estoque.length;
+    
+    estoque = estoque.filter(p => p.id !== id);
+
+    if (estoque.length < tamanhoAntes) {
+        res.send(`<h1>Produto com ID ${id} removido.</h1>`);
+    } else {
+        res.send(`<h1>Produto não encontrado.</h1>`);
+    }
 });
 
-//URL com múltiplos parâmetros
-app.get('/calculadora/somar/:a/:b', function (req, res){
-    let a = Number(req.params.a);
-    let b = Number(req.params.b);
-    let resultado = calculadora.somar(a,b);
-    let string_resultado = `<h1>${a} + ${b} = ${resultado}</h1>`
-    LOG.push(string_resultado);
-    res.send(string_resultado);
+
+
+app.get('/editar/:id/:qtd', (req, res) => {
+    const { id, qtd } = req.params;
+    let encontrado = false;
+
+    estoque.forEach(p => {
+        if (p.id === id) {
+            p.qtd = Number(qtd);
+            encontrado = true;
+        }
+    });
+
+    if (encontrado) {
+        res.send(`<h1>Quantidade do produto ${id} alterada para ${qtd}</h1>`);
+    } else {
+        res.send('<h1>Produto não encontrado.</h1>');
+    }
 });
 
-app.get('/calculadora/log', function (req, res){
-    resultado = "";
-    LOG.forEach(log => {
-        resultado += log;
-    })
-    res.send(resultado);
-});
-
-app.get('/bem-vindo', function (req, res){
-    res.send('<h1>Bem vindo ao desenvolvimento web</h1>')
-});
-
-app.listen(PORT, ()=>{
-    console.log('app rodando na porta ' + PORT);
+app.listen(PORT, () => {
+    console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
