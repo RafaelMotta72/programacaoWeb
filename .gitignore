@@ -827,3 +827,5 @@ app_agendamento_consulta/node_modules/yallist/README.md
 app_agendamento_consulta/node_modules/yallist/yallist.js
 app_agendamento_consulta/package-lock.json
 app_agendamento_consulta/package.json
+node_modules/
+.env
